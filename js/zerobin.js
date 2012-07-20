@@ -104,9 +104,10 @@ function setElementText(element, text) {
  * @param string key : decryption key
  * @param array comments : Array of messages to display (items = array with keys ('data','meta')
  */
-function displayMessages(key, comments) {
+function displayMessages(key, data) {
+  
     try { // Try to decrypt the paste.
-        var cleartext = zeroDecipher(key, comments[0].data);
+        var cleartext = zeroDecipher(key, data);
     } catch(err) {
         $('div#cleartext').hide();
         $('button#clonebutton').hide();
@@ -116,6 +117,7 @@ function displayMessages(key, comments) {
     setElementText($('div#cleartext'), cleartext);
     urls2links($('div#cleartext')); // Convert URLs to clickable links.
 
+    /**
     // Display paste expiration.
     if (comments[0].meta.expire_date) $('div#remainingtime').removeClass('foryoureyesonly').text('This document will expire in '+secondsToHuman(comments[0].meta.remaining_time)+'.').show();
     if (comments[0].meta.burnafterreading) {
@@ -166,6 +168,7 @@ function displayMessages(key, comments) {
         $('div#comments').append('<div class="comment"><button onclick="open_reply($(this),\'' + pasteID() + '\');return false;">Add comment</button></div>');
         $('div#discussion').show();
     }
+    **/
 }
 
 /**
@@ -408,6 +411,43 @@ function pageKey() {
     return key;
 }
 
+/**
+ * Return the url where the data is stored
+ */
+function cipherTextUrl() {
+    var anchor = window.location.hash;
+    var start = anchor.indexOf('cipherTextUrl=');
+    var end = anchor.indexOf('ENDURL');
+    var url = anchor.substring(start + 14,end);
+
+    return url;
+}
+
+/**
+ * Return the ciphertext from wherever it is stored
+ * 
+ */
+function getAndDecryptCipherText() {
+    $.ajax({
+      url: cipherTextUrl(),
+      dataType: 'jsonp',
+      data: {},
+      success: function (data, textStatus, jqXHR) {
+
+        // Show proper elements on screen.
+        stateExistingPaste();
+
+        displayMessages(pageKey(), data);
+        
+      },
+      failure: function (data, textStatus, jqXHR) {
+        showError('Could not retrieve content (bad URL, server error, or not responding).');
+      }
+    });
+
+    return;
+}
+
 $(function() {
     $('select#pasteExpiration').change(function() {
         if ($(this).val() == 'burn') {
@@ -420,29 +460,12 @@ $(function() {
         }
     });
 
-
-    // Display an existing paste
-    if ($('div#cipherdata').text().length > 1) {
-        // Missing decryption key in URL ?
-        if (window.location.hash.length == 0) {
-            showError('Cannot decrypt paste: Decryption key missing in URL (Did you use a redirector or an URL shortener which strips part of the URL ?)');
-            return;
-        }
-
-        // List of messages to display
-        var messages = jQuery.parseJSON($('div#cipherdata').text());
-
-        // Show proper elements on screen.
-        stateExistingPaste();
-
-        displayMessages(pageKey(), messages);
+    // Missing decryption key in URL ?
+    if (window.location.hash.length == 0) {
+        newPaste();
     }
     // Display error message from php code.
     else if ($('div#errormessage').text().length>1) {
         showError($('div#errormessage').text());
-    }
-    // Create a new paste.
-    else {
-        newPaste();
     }
 });
