@@ -330,6 +330,16 @@ function send_data() {
             "privlyInject1": true};
             var url = scriptLocation() + '#' + hashToParameterString(params);
             showStatus('');
+            
+            var element = document.createElement("privlyEventSender");  
+            element.setAttribute("privlyUrl", url);  
+            document.documentElement.appendChild(element);  
+
+            var evt = document.createEvent("Events");  
+            evt.initEvent("PrivlyUrlEvent", true, false);  
+            element.dispatchEvent(evt);
+            
+            
             $('div#pastelink').html('Your paste is <a href="' + url + '">' + url + '</a>').show();
             setElementText($('div#cleartext'), $('textarea#message').val());
             urls2links($('div#cleartext'));
@@ -352,6 +362,7 @@ function send_data() {
  * Put the screen in "New paste" mode.
  */
 function stateNewPaste() {
+    $('#privlyStylesheet').attr("disabled",true);
     $('button#sendbutton').show();
     $('button#clonebutton').hide();
     $('div#expiration').show();
@@ -544,5 +555,6 @@ $(function() {
     }
     else {
       getAndDecryptCipherText();
+      $('#zerobinStylesheet').attr("disabled",true);
     }
 });

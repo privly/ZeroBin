@@ -1,7 +1,8 @@
 <html>
 <head>
 <title>ZeroBin</title>
-<link type="text/css" rel="stylesheet" href="css/zerobin.css" /> 
+<link id="privlyStylesheet" type="text/css" rel="stylesheet" href="css/privly.css" />
+<link id="zerobinStylesheet" type="text/css" rel="stylesheet" href="css/zerobin.css" />
 <script src="js/jquery.js"></script>
 <script src="js/sjcl.js"></script>
 <script src="js/base64.js"></script>
@@ -19,13 +20,16 @@
 
 </head>
   <body privly-exclude="true">
+    <div class="iframe_hide">
       <div id="aboutbox">
           ZeroBin is a minimalist, opensource online pastebin where the server has zero knowledge of pasted data.
           Data is encrypted/decrypted <i>in the browser</i> using 256 bits AES. 
           More information on the <a href="http://sebsauvage.net/wiki/doku.php?id=php:zerobin">project page</a>.<br />
           <span style="text-decoration:blink;font-size:10pt;color:#a4b3c4;">&#9654;</span> Note: This is a test service: 
           Data may be deleted anytime. Kittens will die if you abuse this service.
-</div>
+      </div>
+    </div>
+    <div class="iframe_hide">
     <h1 title="ZeroBin" onclick="window.location.href=scriptLocation();return false;">ZeroBin</h1><br>
     <h2>Because ignorance is bliss</h2><br>
     <h3>Rails Port</h3>
@@ -69,16 +73,15 @@
            <label for="opendiscussion">Open discussion</label>
         </div>
     </div>
+    </div>
     <div id="pastelink" style="display:none;"></div>
     <div id="cleartext" style="display:none;"></div>
+    <div class="iframe_hide">
     <textarea id="message" name="message" cols="80" rows="25" style="display:none;"></textarea>
     <div id="discussion" style="display:none;">
         <h4>Discussion</h4>
         <div id="comments"></div>
     </div>
-    
-    
-    
-    <!-- <div id="cipherdata" style="display:none;">[{"data":"{\"iv\":\"H4buHTKcq3ZeT0BOgZugKA\",\"salt\":\"xL38b\/ESCKc\",\"ct\":\"KKxyNdyLvNmcHegbZmKj4Q\"}","meta":{"expire_date":1343528167,"postdate":1340936167,"remaining_time":2591981}}]</div> -->
+    </div>
   </body>
 </html>
