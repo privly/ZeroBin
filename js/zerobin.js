@@ -365,12 +365,12 @@ function stateNewPaste() {
     $('#privlyStylesheet').attr("disabled",true);
     $('button#sendbutton').show();
     $('button#clonebutton').hide();
-    $('div#expiration').show();
+    //$('div#expiration').show();
     $('div#remainingtime').hide();
     $('div#language').hide(); // $('#language').show();
     $('input#password').hide(); //$('#password').show();
-    $('div#opendisc').show();
-    $('button#newbutton').show();
+    //$('div#opendisc').show();
+    //$('button#newbutton').show();
     $('div#pastelink').hide();
     $('textarea#message').text('');
     $('textarea#message').show();
@@ -393,11 +393,11 @@ function stateExistingPaste() {
         $('button#clonebutton').show();
     }
 
-    $('div#expiration').hide();
+    //$('div#expiration').hide();
     $('div#language').hide();
     $('input#password').hide();
-    $('div#opendisc').hide();
-    $('button#newbutton').show();
+    //$('div#opendisc').hide();
+    //$('button#newbutton').show();
     $('div#pastelink').hide();
     $('textarea#message').hide();
     $('div#cleartext').show();
@@ -536,12 +536,12 @@ function getAndDecryptCipherText() {
 $(function() {
     $('select#pasteExpiration').change(function() {
         if ($(this).val() == 'burn') {
-            $('div#opendisc').addClass('buttondisabled');
-            $('input#opendiscussion').attr('disabled',true);
+            //$('div#opendisc').addClass('buttondisabled');
+            //$('input#opendiscussion').attr('disabled',true);
         }
         else {
-            $('div#opendisc').removeClass('buttondisabled');
-            $('input#opendiscussion').removeAttr('disabled');
+            //$('div#opendisc').removeClass('buttondisabled');
+            //$('input#opendiscussion').removeAttr('disabled');
         }
     });
 
