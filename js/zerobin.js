@@ -340,10 +340,11 @@ function send_data() {
             element.dispatchEvent(evt);
             
             
-            $('div#pastelink').html('Your paste is <a href="' + url + '">' + url + '</a>').show();
+            $('div#pastelink').html('Copy this address to share <br /> <a href="' + url + '" target="_blank">' + url + '</a>').show();
             setElementText($('div#cleartext'), $('textarea#message').val());
             urls2links($('div#cleartext'));
             showStatus('');
+            $('div#cleartext').delay(800).slideUp("slow");
         }
         else if (data.status==1) {
             showError('Could not create paste: '+data.message);
@@ -451,7 +452,7 @@ function showStatus(message, spin) {
     $('div#status').removeClass('errorMessage');
     $('div#status').text(message);
     if (spin) {
-        var img = '<img src="img/busy.gif" style="width:16px;height:9px;margin:0px 4px 0px 0px;" />';
+        var img = '<img src="/zero_bin/img/busy.gif" style="width:16px;height:9px;margin:0px 4px 0px 0px;" />';
         $('div#status').prepend(img);
         $('div#replystatus').prepend(img);
     }
