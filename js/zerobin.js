@@ -519,15 +519,11 @@ function getAndDecryptCipherText() {
       dataType: 'jsonp',
       data: {},
       success: function (data, textStatus, jqXHR) {
-
-        // Show proper elements on screen.
         stateExistingPaste();
-
         displayMessages(pageKey(), data);
-        
       },
-      failure: function (data, textStatus, jqXHR) {
-        showError('Could not retrieve content (bad URL, server error, or not responding).');
+      error: function (data, textStatus, jqXHR) {
+        showError('Could not retrieve your content. It might not exist, you might not have access, or there was a server error.');
       }
     });
 
