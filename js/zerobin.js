@@ -555,7 +555,13 @@ $(function() {
         showError($('div#errormessage').text());
     }
     else {
-      getAndDecryptCipherText();
-      $('#zerobinStylesheet').attr("disabled",true);
+      // If if it in an iframe, show only the decrypted content
+      if (self === top) {
+        newPaste();
+        getAndDecryptCipherText();
+      } else {
+        $('#zerobinStylesheet').attr("disabled",true);
+        getAndDecryptCipherText();
+      }
     }
 });
