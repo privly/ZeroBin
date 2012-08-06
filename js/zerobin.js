@@ -545,8 +545,8 @@ function postResizeMessage() {
     var evt = document.createEvent("Events");  
     evt.initEvent("IframeResizeEvent", true, false);
     var element = document.createElement("privElement");
-    element.setAttribute("height", height);  
-    element.setAttribute("frameName", frameName);  
+    element.setAttribute("height", newHeight);  
+    element.setAttribute("frameName", window.name);  
     document.documentElement.appendChild(element);    
     element.dispatchEvent(evt);
   }
