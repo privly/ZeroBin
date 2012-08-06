@@ -521,6 +521,7 @@ function getAndDecryptCipherText() {
       success: function (data, textStatus, jqXHR) {
         stateExistingPaste();
         displayMessages(pageKey(), data);
+        postResizeMessage();
       },
       error: function (data, textStatus, jqXHR) {
         showError('Could not retrieve your content. It might not exist, you might not have access, or there was a server error.');
@@ -528,6 +529,27 @@ function getAndDecryptCipherText() {
     });
 
     return;
+}
+
+/**
+ * Tell the parent document (if it exists), the name and height
+ * of this document. First it posts a message to the parent iframe,
+ * then dispatches an event.
+ */
+function postResizeMessage() {
+  
+  if (top !== self) {
+    var newHeight = document.getElementById("privlyHeightWrapper").offsetHeight;
+    parent.postMessage(window.name+","+newHeight,"*");
+
+    var evt = document.createEvent("Events");  
+    evt.initEvent("IframeResizeEvent", true, false);
+    var element = document.createElement("privElement");
+    element.setAttribute("height", height);  
+    element.setAttribute("frameName", frameName);  
+    document.documentElement.appendChild(element);    
+    element.dispatchEvent(evt);
+  }
 }
 
 $(function() {
