@@ -300,63 +300,23 @@ function send_comment(parentid) {
                 showError('Could not post comment.');
             }
         });
-    }
-
+}
+    
 /**
  *  Send a new paste to server
  */
 function send_data() {
-    // Do not send if no data.
-    if ($('textarea#message').val().length == 0) {
-        return;
-    }
-    showStatus('Sending paste...', spin=true);
-    var randomkey = sjcl.codec.base64.fromBits(sjcl.random.randomWords(8, 0), 0);
-    var cipherdata = zeroCipher(randomkey, $('textarea#message').val());
-    var data_to_send = JSON.parse(cipherdata);
-    
-    $.ajax({
-      data: data_to_send,
-      type: "POST",
-      url: scriptLocation(),
-      contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-      dataType: "json",
-      accepts: "json",
-      success: function (data, textStatus, jqXHR) {
-        if (jqXHR.getResponseHeader("X-Privly-Url") !== undefined) {
-            stateExistingPaste();
-            var params = {"privlyLinkKey": randomkey, 
-            "privlyCiphertextURL": jqXHR.getResponseHeader("X-Privly-Url"),
-            "privlyInject1": true};
-            var url = scriptLocation() + '#' + hashToParameterString(params);
-            showStatus('');
-            
-            var element = document.createElement("privlyEventSender");  
-            element.setAttribute("privlyUrl", url);  
-            document.documentElement.appendChild(element);  
-
-            var evt = document.createEvent("Events");  
-            evt.initEvent("PrivlyUrlEvent", true, false);  
-            element.dispatchEvent(evt);
-            
-            
-            $('div#pastelink').html('Copy this address to share <br /> <a href="' + url + '" target="_blank">' + url + '</a>').show();
-            setElementText($('div#cleartext'), $('textarea#message').val());
-            urls2links($('div#cleartext'));
-            showStatus('');
-            $('div#cleartext').delay(800).slideUp("slow");
-        }
-        else if (data.status==1) {
-            showError('Could not create paste: '+data.message);
-        }
-        else {
-            showError('Could not create paste.');
-        }
-      },
-      error: function (data, textStatus, jqXHR) { 
-        showError('Data could not be sent (serveur error or not responding).');
-      }
-    });
+  
+  // Do not send if no data.
+  if ($('textarea#message').val().length == 0) {
+      return;
+  }
+  showStatus('Sending paste...', spin=true);
+  var randomkey = sjcl.codec.base64.fromBits(sjcl.random.randomWords(8, 0), 0);
+  var cipherdata = zeroCipher(randomkey, $('textarea#message').val());
+  var data_to_send = JSON.parse(cipherdata);
+  
+ privlyPostContent(data_to_send, randomkey);
 }
 
 /**
@@ -514,20 +474,7 @@ function cipherTextUrl() {
  * 
  */
 function getAndDecryptCipherText() {
-    $.ajax({
-      url: cipherTextUrl(),
-      dataType: 'jsonp',
-      data: {},
-      success: function (data, textStatus, jqXHR) {
-        stateExistingPaste();
-        displayMessages(pageKey(), data);
-        postResizeMessage();
-      },
-      error: function (data, textStatus, jqXHR) {
-        showError('Could not retrieve your content. It might not exist, you might not have access, or there was a server error.');
-      }
-    });
-
+    privlyGetContent();
     return;
 }
 
