@@ -15,6 +15,10 @@ function privlyGetContent() {
     .success( 
       function (data, textStatus, jqXHR) {
         stateExistingPaste();
+        
+        $("#manage_link").attr("href", cipherTextUrl());
+        $('#manage_link_div').slideDown("slow");
+        
         displayMessages(pageKey(), data.structured_content);
         postResizeMessage();
       })
@@ -83,6 +87,9 @@ function privlyPostContentWithCSRFToken(data_to_send, randomkey) {
           "privlyInject1": true};
           var url = scriptLocation() + '#' + hashToParameterString(params);
           showStatus('');
+          
+          $("#manage_link").attr("href", jqXHR.getResponseHeader("X-Privly-Url"));
+          $('#manage_link_div').slideDown("slow");
           
           firePrivlyURLEvent(url);
           
