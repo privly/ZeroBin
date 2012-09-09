@@ -68,7 +68,8 @@ function privlyPostContentWithCSRFToken(data_to_send, randomkey) {
               };
   
   $.ajax({
-    data: {post:{structured_content: data_to_send, share: share}},
+    data: {post:{structured_content: data_to_send, share: share, 
+      public: $("#post_public").is(':checked')}},
     type: "POST",
     url: postingAddress,
     contentType: "application/x-www-form-urlencoded; charset=UTF-8",
