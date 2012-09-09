@@ -54,8 +54,21 @@ function privlyPostContentWithCSRFToken(data_to_send, randomkey) {
   
   var postingAddress = window.location.protocol + "//" + window.location.host + "/posts";
   
+  sharesFormSubmit($('#share_identity'),
+                   $('#share_share_csv'),
+                   $('#identity_provider_name'));
+  var share = {
+                can_show: $("#share_can_show").is(':checked'),
+                can_update: $("#share_can_update").is(':checked'),
+                can_destroy: $("#share_can_destroy").is(':checked'),
+                can_share: $("#share_can_share").is(':checked'),
+                identity: $("#share_identity").val(),
+                share_csv: $("#share_share_csv").val(),
+                identity_provider_name: $("#identity_provider_name").val()
+              };
+  
   $.ajax({
-    data: {post:{structured_content: data_to_send, public:true}},
+    data: {post:{structured_content: data_to_send, share: share}},
     type: "POST",
     url: postingAddress,
     contentType: "application/x-www-form-urlencoded; charset=UTF-8",

@@ -12,6 +12,7 @@
 <script type="text/javascript" src="/zero_bin/js/rawinflate.js"></script>
 <script type="text/javascript" src="/zero_bin/js/zerobin.js"></script>
 <script type="text/javascript" src="/zero_bin/js/privlyservice.js"></script>
+<script type="text/javascript" src="/zero_bin/js/privlyshare.js"></script>
 
 <!--[if lt IE 10]>
 <style> body {padding-left:60px;padding-right:60px;} div#ienotice {display:block;} </style>
@@ -28,7 +29,6 @@
     <div id="wrapper_center">
     <div id="status">&nbsp;</div>
     <div id="errormessage" style="display:none"></div>
-    
     <div id="pastelink" style="display:none;"></div>
     <div id="cleartext" style="display:none;"></div>
     <div class="iframe_hide">
@@ -37,6 +37,7 @@
         <h4>Discussion</h4>
         <div id="comments"></div>
       </div>
+      <br />
     </div>
     
     <div class="iframe_hide">
@@ -55,6 +56,32 @@
             privacy and security.
       </div>
       <button id="sendbutton" onclick="send_data();return false;" style="display:none;"><img src="/zero_bin/img/icon_send.png" width="18" height="15" />Encrypt+Send</button>
+      
+      <div id="share_form_elements" style="display:none;">
+        <br />
+        <label for="post_public">Public: </label>
+        <input id="post_public" type="checkbox" value="1" onclick="$('#csv_form').slideDown('slow');" name="post[public]" checked="checked">
+        <div id="csv_form" style="display:none;">
+          <p>
+              Sharing Rule: <br /><span id="type_mesasge">Type an Email, domain, IP Address, or password</span>
+              <br />
+              <input autocomplete="off" id="share_share_csv" name="share[share_csv]" style="display:none;" type="text" value="" />
+              <input id="identity_provider_name" type="hidden" value="Password" name="share[identity_provider_name]">
+              <input autocomplete="off" id="share_identity" name="share[identity]" onchange="identityIdAndMessage($('#share_identity').val(), $('#type_mesasge'), $('#identity_provider_name'))" onkeyup="identityIdAndMessage($('#share_identity').val(), $('#type_mesasge'), $('#identity_provider_name'))" onsubmit="identityIdAndMessage($('#share_identity').val(), $('#type_mesasge'), $('#identity_provider_name'))" size="30" type="text" /> Make sure you give yourself access!
+              <br />
+              <input checked="checked" id="share_can_show" name="share[can_show]" type="checkbox" value="1" />
+              <label for="share_can_show">Can View</label>
+              <input id="share_can_destroy" name="share[can_destroy]" type="checkbox" value="1" />
+              <label for="share_can_destroy">Can destroy</label>
+              <input id="share_can_update" name="share[can_update]" type="checkbox" value="1" />
+              <label for="share_can_update">Can update</label>
+              <input id="share_can_share" name="share[can_share]" type="checkbox" value="1" />
+              <label for="share_can_share">Can share</label>
+          </p>
+        </div>
+      </div>
+      
+      
       <noscript><div class="nonworking">Javascript is required for ZeroBin to work.<br>Sorry for the inconvenience.</div></noscript>
       <div id="oldienotice" class="nonworking">ZeroBin requires a modern browser to work.</div>
       <div id="ienotice">Still using Internet Explorer ? &nbsp;Do yourself a favor, switch to a modern browser: 

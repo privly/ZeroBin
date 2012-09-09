@@ -323,6 +323,7 @@ function send_data() {
  * Put the screen in "New paste" mode.
  */
 function stateNewPaste() {
+    $('#share_form_elements').show();
     $('#privlyStylesheet').attr("disabled",true);
     $('button#sendbutton').show();
     $('button#clonebutton').hide();
@@ -345,7 +346,8 @@ function stateNewPaste() {
  */
 function stateExistingPaste() {
     $('button#sendbutton').hide();
-
+    $('#share_form_elements').hide();
+    
     // No "clone" for IE<10.
     if ($('div#oldienotice').is(":visible")) {
         $('button#clonebutton').hide();
