@@ -107,7 +107,7 @@ function privlyPostContentWithCSRFToken(data_to_send, randomkey) {
       }
     },
     error: function (data, textStatus, jqXHR) { 
-      showError('Data could not be sent (serveur error or not responding).');
+      showError('Data could not be sent (server error or not responding): ' + data.responseText);
     }
   });
 }
