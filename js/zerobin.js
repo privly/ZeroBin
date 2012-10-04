@@ -1,8 +1,28 @@
 /**
- * ZeroBin 0.15
+ * ZeroBin Privly Fork
  *
  * @link http://sebsauvage.net/wiki/doku.php?id=php:zerobin
  * @author sebsauvage
+ * @contributor smcgregor
+ *
+ * This is a port of the ZeroBin project for a Privly injectable appliction.
+ * See: 
+ * https://github.com/privly/privly-organization/wiki/Injectable-Applications
+ *
+ * The application uses no template rendering, but it has several different
+ * "modes" depending on the state of the URL on the application.
+ * The "modes" are:
+ * 1. Create new post. The application presents a form for typing content. The
+ *    application will poll the server to see if the user is currently logged in
+ *    and tells the user to log in if they are not currently.
+ * 2. View content. The content is displayed along with links for creating
+ *    new content.
+ * 3. View content from within an iframe. Content is viewed in an iframe
+ *    when the application has been injected into a web page. In this case, the
+ *    post creation forms and information is not displayed. The end user does not
+ *    need to know that the content they are viewing has been fetched from a 
+ *    server and decrypted.
+ *
  */
 
 // Immediately start random number generator collector.
@@ -184,124 +204,8 @@ function displayMessages(key, data) {
     }
     setElementText($('div#cleartext'), cleartext);
     urls2links($('div#cleartext')); // Convert URLs to clickable links.
-
-    /**
-    // Display paste expiration.
-    if (comments[0].meta.expire_date) $('div#remainingtime').removeClass('foryoureyesonly').text('This document will expire in '+secondsToHuman(comments[0].meta.remaining_time)+'.').show();
-    if (comments[0].meta.burnafterreading) {
-        $('div#remainingtime').addClass('foryoureyesonly').text('FOR YOUR EYES ONLY.  Don\'t close this window, this message can\'t be displayed again.').show();
-        $('button#clonebutton').hide(); // Discourage cloning (as it can't really be prevented).
-    }
-
-    // If the discussion is opened on this paste, display it.
-    if (comments[0].meta.opendiscussion) {
-        $('div#comments').html('');
-        // For each comment.
-        for (var i = 1; i < comments.length; i++) {
-            var comment=comments[i];
-            var cleartext="[Could not decrypt comment ; Wrong key ?]";
-            try {
-                cleartext = zeroDecipher(key, comment.data);
-            } catch(err) { }
-            var place = $('div#comments');
-            // If parent comment exists, display below (CSS will automatically shift it right.)
-            var cname = 'div#comment_'+comment.meta.parentid
-
-            // If the element exists in page
-            if ($(cname).length) {
-                place = $(cname);
-            }
-            var divComment = $('<div class="comment" id="comment_' + comment.meta.commentid+'">'
-                               + '<div class="commentmeta"><span class="nickname"></span><span class="commentdate"></span></div><div class="commentdata"></div>'
-                               + '<button onclick="open_reply($(this),\'' + comment.meta.commentid + '\');return false;">Reply</button>'
-                               + '</div>');
-            setElementText(divComment.find('div.commentdata'), cleartext);
-            // Convert URLs to clickable links in comment.
-            urls2links(divComment.find('div.commentdata'));
-            divComment.find('span.nickname').html('<i>(Anonymous)</i>');
-
-            // Try to get optional nickname:
-            try {
-                divComment.find('span.nickname').text(zeroDecipher(key, comment.meta.nickname));
-            } catch(err) { }
-            divComment.find('span.commentdate').text('  ('+(new Date(comment.meta.postdate*1000).toUTCString())+')').attr('title','CommentID: ' + comment.meta.commentid);
-
-            // If an avatar is available, display it.
-            if (comment.meta.vizhash) {
-                divComment.find('span.nickname').before('<img src="' + comment.meta.vizhash + '" class="vizhash" title="Anonymous avatar (Vizhash of the IP address)" />');
-            }
-
-            place.append(divComment);
-        }
-        $('div#comments').append('<div class="comment"><button onclick="open_reply($(this),\'' + pasteID() + '\');return false;">Add comment</button></div>');
-        $('div#discussion').show();
-    }
-    **/
 }
 
-/**
- * Open the comment entry when clicking the "Reply" button of a comment.
- * @param object source : element which emitted the event.
- * @param string commentid = identifier of the comment we want to reply to.
- */
-function open_reply(source, commentid) {
-    $('div.reply').remove(); // Remove any other reply area.
-    source.after('<div class="reply">'
-                + '<input type="text" id="nickname" title="Optional nickname..." value="Optional nickname..." />'
-                + '<textarea id="replymessage" class="replymessage" cols="80" rows="7"></textarea>'
-                + '<br><button id="replybutton" onclick="send_comment(\'' + commentid + '\');return false;">Post comment</button>'
-                + '<div id="replystatus">&nbsp;</div>'
-                + '</div>');
-    $('input#nickname').focus(function() {
-        $(this).css('color', '#000');
-        if ($(this).val() == $(this).attr('title')) {
-            $(this).val('');
-        }
-    });
-    $('textarea#replymessage').focus();
-}
-
-/**
- * Send a reply in a discussion.
- * @param string parentid : the comment identifier we want to send a reply to.
- */
-function send_comment(parentid) {
-    // Do not send if no data.
-    if ($('textarea#replymessage').val().length==0) {
-        return;
-    }
-
-    showStatus('Sending comment...', spin=true);
-    var cipherdata = zeroCipher(pageKey(), $('textarea#replymessage').val());
-    var ciphernickname = '';
-    var nick=$('input#nickname').val();
-    if (nick != '' && nick != 'Optional nickname...') {
-        ciphernickname = zeroCipher(pageKey(), nick);
-    }
-    var data_to_send = { data:cipherdata,
-                         parentid: parentid,
-                         pasteid:  pasteID(),
-                         nickname: ciphernickname
-                       };
-
-    $.post(scriptLocation(), data_to_send, 'json')
-        .error(function() {
-            showError('Comment could not be sent (serveur error or not responding).');
-        })
-        .success(function(data) {
-            if (data.status == 0) {
-                showStatus('Comment posted.');
-                location.reload();
-            }
-            else if (data.status==1) {
-                showError('Could not post comment: '+ data.message);
-            }
-            else {
-                showError('Could not post comment.');
-            }
-        });
-}
-    
 /**
  *  Send a new paste to server
  */
@@ -314,31 +218,95 @@ function send_data() {
   showStatus('Sending paste...', spin=true);
   var randomkey = sjcl.codec.base64.fromBits(sjcl.random.randomWords(8, 0), 0);
   var cipherdata = zeroCipher(randomkey, $('textarea#message').val());
-  var data_to_send = JSON.parse(cipherdata);
+  var cipher_json = JSON.parse(cipherdata);
   
- privlyPostContent(data_to_send, randomkey);
+  sharesFormSubmit($('#share_identity'),
+                   $('#share_share_csv'),
+                   $('#identity_provider_name'));
+  var share = {
+                can_show: $("#share_can_show").is(':checked'),
+                can_update: $("#share_can_update").is(':checked'),
+                can_destroy: $("#share_can_destroy").is(':checked'),
+                can_share: $("#share_can_share").is(':checked'),
+                identity: $("#share_identity").val(),
+                share_csv: $("#share_share_csv").val(),
+                identity_provider_name: $("#identity_provider_name").val()
+              };
+  var data_to_send = {
+    post:{
+      structured_content: cipher_json, 
+      share: share, 
+      public: $("#post_public").is(':checked')}};
+  
+  //Function called if the server returns successfully
+  var successCallback = function (data, textStatus, jqXHR) {
+    
+    //We expect the remote server to return a header containing
+    //the URL holding the structured content.
+    if (jqXHR.getResponseHeader("X-Privly-Url") === undefined) {
+      showError('Remote server did not return a URL.');
+      return;
+    }
+    stateExistingPaste();
+    
+    //Form the URL for people to share it.
+    var params = {"privlyLinkKey": randomkey, 
+      "privlyCiphertextURL": jqXHR.getResponseHeader("X-Privly-Url"),
+      "privlyInject1": true};
+    var url = scriptLocation() + '#' + hashToParameterString(params);
+    showStatus('');
+
+    $("#manage_link").attr("href", jqXHR.getResponseHeader("X-Privly-Url"));
+    $('#manage_link_div').slideDown("slow");
+
+    firePrivlyURLEvent(url);
+
+    $('div#pastelink').html('Copy this address to share <br /> <a href="' + url + '" target="_blank">' + url + '</a>').show();
+    setElementText($('div#cleartext'), $('textarea#message').val());
+    urls2links($('div#cleartext'));
+    showStatus('');
+    $('div#cleartext').delay(800).slideUp("slow");
+  };
+  
+  //Function called if there is a problem posting the data to the server
+  var errorCallback = function (data, textStatus, jqXHR) { 
+    showError('Data could not be sent (server error or not responding): ' + data.responseText);
+  };
+ 
+ privlyPostContent(data_to_send, successCallback, errorCallback);
 }
 
 /**
  * Put the screen in "New paste" mode.
  */
 function stateNewPaste() {
+    $('#loginprompt').hide();
+    $('#toolbar').show();
     $('#share_form_elements').show();
     $('#privlyStylesheet').attr("disabled",true);
     $('button#sendbutton').show();
     $('button#clonebutton').hide();
-    //$('div#expiration').show();
-    $('div#remainingtime').hide();
-    $('div#language').hide(); // $('#language').show();
-    $('input#password').hide(); //$('#password').show();
-    //$('div#opendisc').show();
-    //$('button#newbutton').show();
     $('div#pastelink').hide();
-    $('textarea#message').text('');
+    $('textarea#message').text($('div#cleartext').text());
+    //$('textarea#message').text('');
     $('textarea#message').show();
     $('div#cleartext').hide();
     $('div#message').focus();
-    $('div#discussion').hide();
+}
+
+/**
+ * Put the screen in "Login" mode.
+ */
+function stateLogin() {
+  $('#loginprompt').show();
+  $('#toolbar').show();
+  $('#share_form_elements').hide();
+  $('#privlyStylesheet').attr("disabled",true);
+  $('button#sendbutton').hide();
+  $('button#clonebutton').hide();
+  $('div#pastelink').hide();
+  $('textarea#message').hide();
+  $('div#cleartext').hide();
 }
 
 /**
@@ -355,33 +323,10 @@ function stateExistingPaste() {
     else {
         $('button#clonebutton').show();
     }
-
-    //$('div#expiration').hide();
-    $('div#language').hide();
-    $('input#password').hide();
-    //$('div#opendisc').hide();
-    //$('button#newbutton').show();
+    
     $('div#pastelink').hide();
     $('textarea#message').hide();
     $('div#cleartext').show();
-}
-
-/**
- * Clone the current paste.
- */
-function clonePaste() {
-    stateNewPaste();
-    showStatus('');
-    $('textarea#message').text($('div#cleartext').text());
-}
-
-/**
- * Create a new paste.
- */
-function newPaste() {
-    stateNewPaste();
-    showStatus('');
-    $('textarea#message').text('');
 }
 
 /**
@@ -472,15 +417,6 @@ function cipherTextUrl() {
 }
 
 /**
- * Return the ciphertext from wherever it is stored
- * 
- */
-function getAndDecryptCipherText() {
-    privlyGetContent();
-    return;
-}
-
-/**
  * Tell the parent document (if it exists), the name and height
  * of this document. First it posts a message to the parent iframe,
  * then dispatches an event.
@@ -501,34 +437,80 @@ function postResizeMessage() {
   }
 }
 
-$(function() {
-    $('select#pasteExpiration').change(function() {
-        if ($(this).val() == 'burn') {
-            //$('div#opendisc').addClass('buttondisabled');
-            //$('input#opendiscussion').attr('disabled',true);
-        }
-        else {
-            //$('div#opendisc').removeClass('buttondisabled');
-            //$('input#opendiscussion').removeAttr('disabled');
-        }
-    });
+/**
+ * Request CSRF token and check permissions on current server
+ */
+function initializePosting() {
+    //Asks for CSRF token and checks user's current permissions
+    initPrivlyService(
+      stateNewPaste, 
+      function(){
+        alert("Privly is in Closed Alpha. Your user account does not have permission to create new content");
+        },
+      stateLogin,
+      function(){
+        showError('Could not create post (CSRF Token service not available).');
+      }
+    );
+}
 
-    // Missing decryption key in URL ?
+/**
+ * On Page load, the forms and layouts are initialized.
+ * If the URL's hash contains content, then the application
+ * will attempt to fetch the remote ciphertext for decryption
+ */
+$(function() {
+  
+  //Dissable the Privly stylesheet by default.
+  //It should only be active if the content is
+  //being viewed in an iframe.
+  $('#privlyStylesheet').attr("disabled",true);
+  
+    // This must be a new post if the hash is empty.
+    // Otherwise the app will try to fetch, decryptand,
+    // and render the content.
     if (window.location.hash.length == 0) {
-        newPaste();
-    }
-    // Display error message from php code.
-    else if ($('div#errormessage').text().length>1) {
-        showError($('div#errormessage').text());
+      initializePosting();
     }
     else {
-      // If if it in an iframe, show only the decrypted content
-      if (self === top) {
-        newPaste();
-        getAndDecryptCipherText();
-      } else {
+      
+      // If if it in an iframe, show only the decrypted content.
+      // This is managed by activating the Privly-specific
+      // stylesheet and deactivating the ZeroBin Stylesheet
+      if (self !== top) {
         $('#zerobinStylesheet').attr("disabled",true);
-        getAndDecryptCipherText();
+        $('#privlyStylesheet').attr("disabled",false);
+        //Open the content on the content server if it is clicked
+        $("body").on("click",function(evt){
+          if(evt.target.nodeName !== "A") {
+            window.open(window.location.href, '_blank');
+          }
+        });
+        
+        //Display tooltip indicating the content has been injected
+        tooltip();
       }
+      $("#toolbar").show();
+      
+      // This callback receives the data from the URL found on the hash
+      var retrievedCiphertextCallback = function(data, textStatus, jqXHR) {
+        stateExistingPaste();
+        $("#manage_link").attr("href", cipherTextUrl());
+        $('#manage_link_div').slideDown("slow");
+        displayMessages(pageKey(), data.structured_content);
+        postResizeMessage();
+      };
+      
+      //This callback is fired if the person does not have access to the
+      //content or there is some other error. In this state, the user will
+      //see a new posting form.
+      var failureFunction = function(data, textStatus, jqXHR) {
+        initializePosting();
+        showError('Could not retrieve your content. It might not exist, you might not have access, or there was a server error.');
+      };
+      
+      //Get the content and fire the callbacks.
+      privlyGetContent(cipherTextUrl(), retrievedCiphertextCallback, 
+                      failureFunction);
     }
 });

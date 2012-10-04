@@ -1,3 +1,8 @@
+
+This is the Privly port of the ZeroBin application (see below). For more information on what Privly is, see [Priv.ly](https://priv.ly). For information on how we are using ZeroBin, read about [injectable applications](https://github.com/privly/privly-organization/wiki/Injectable-Applications).
+
+------------------------------------------------------------------------------
+
 ZeroBin 0.15 Alpha
 === THIS IS ALPHA SOFTWARE - USE AT YOUR OWN RISKS ====
 

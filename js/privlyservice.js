@@ -9,23 +9,26 @@
 
 /** 
  * Get, decrypt, display, then resize for content.
+ *
+ * @param url string The URL of the content to fetch.
+ *
+ * @param successCallback function the function to call after the content 
+ * successfully returns. The callback is expected to accept three parameters: 
+ * data, textStatus, and jqXHR.
+ *
+ * @param failureCallback function the function to call after the content 
+ * fails to return. The callback is expected to accept three parameters: 
+ * data, textStatus, and jqXHR.
+ *
  */
-function privlyGetContent() {
-  $.getJSON(cipherTextUrl())
-    .success( 
-      function (data, textStatus, jqXHR) {
-        stateExistingPaste();
-        
-        $("#manage_link").attr("href", cipherTextUrl());
-        $('#manage_link_div').slideDown("slow");
-        
-        displayMessages(pageKey(), data.structured_content);
-        postResizeMessage();
-      })
+function privlyGetContent(url, successCallback, failureCallback) {
+  $.getJSON(url)
+    .success(
+      successCallback
+    )
     .error(
-      function (data, textStatus, jqXHR) {
-      showError('Could not retrieve your content. It might not exist, you might not have access, or there was a server error.');
-    });
+      failureCallback
+    );
   return;
 }
 
@@ -33,6 +36,9 @@ function privlyGetContent() {
  * Fire an event containing the Privly URL for extensions to capture.
  * This is used in posting dialogs where the application pops up for the
  * user to create a post.
+ *
+ * @param url string The URL to send to extensions.
+ *
  */
 function firePrivlyURLEvent(url) {
   var element = document.createElement("privlyEventSender");  
@@ -46,139 +52,72 @@ function firePrivlyURLEvent(url) {
 
 /**
  * Post content to the content server and generate the new resource's URL.
- * This function should only be called by privlyPostContent();
  *
  * @param data_to_send JSON The JSON document getting posted to the server.
- * @param randomkey The random key used to encrypt the content. This parameter
- * is never sent to the remote server, but it is appended to the generated
- * URL.
- * Access: private
+ * @param successCallback The function to execute after the content server
+ * returns successfully.The callback is expected to accept three parameters: 
+ * data, textStatus, and jqXHR.
+ * @param errorCallback The function to execute after the content server
+ * returns in a failure state.The callback is expected to accept three 
+ * parameters: data, textStatus, and jqXHR.
  */
-function privlyPostContentWithCSRFToken(data_to_send, randomkey) {
+function privlyPostContent(data_to_send, successCallback, errorCallback) {
   
-  var postingAddress = window.location.protocol + "//" + window.location.host + "/posts";
-  
-  sharesFormSubmit($('#share_identity'),
-                   $('#share_share_csv'),
-                   $('#identity_provider_name'));
-  var share = {
-                can_show: $("#share_can_show").is(':checked'),
-                can_update: $("#share_can_update").is(':checked'),
-                can_destroy: $("#share_can_destroy").is(':checked'),
-                can_share: $("#share_can_share").is(':checked'),
-                identity: $("#share_identity").val(),
-                share_csv: $("#share_share_csv").val(),
-                identity_provider_name: $("#identity_provider_name").val()
-              };
+  var url = window.location.protocol + "//" + window.location.host + "/posts";
   
   $.ajax({
-    data: {post:{structured_content: data_to_send, share: share, 
-      public: $("#post_public").is(':checked')}},
+    data: data_to_send,
     type: "POST",
-    url: postingAddress,
+    url: url,
     contentType: "application/x-www-form-urlencoded; charset=UTF-8",
     dataType: "json",
     accepts: "json",
-    success: function (data, textStatus, jqXHR) {
-      if (jqXHR.getResponseHeader("X-Privly-Url") !== undefined) {
-          stateExistingPaste();
-          var params = {"privlyLinkKey": randomkey, 
-          "privlyCiphertextURL": jqXHR.getResponseHeader("X-Privly-Url"),
-          "privlyInject1": true};
-          var url = scriptLocation() + '#' + hashToParameterString(params);
-          showStatus('');
-          
-          $("#manage_link").attr("href", jqXHR.getResponseHeader("X-Privly-Url"));
-          $('#manage_link_div').slideDown("slow");
-          
-          firePrivlyURLEvent(url);
-          
-          $('div#pastelink').html('Copy this address to share <br /> <a href="' + url + '" target="_blank">' + url + '</a>').show();
-          setElementText($('div#cleartext'), $('textarea#message').val());
-          urls2links($('div#cleartext'));
-          showStatus('');
-          $('div#cleartext').delay(800).slideUp("slow");
-      }
-      else if (data.status==1) {
-          showError('Could not create paste: ' + data.message);
-      }
-      else {
-          showError('Could not create paste.');
-      }
-    },
-    error: function (data, textStatus, jqXHR) { 
-      showError('Data could not be sent (server error or not responding): ' + data.responseText);
-    }
+    success: successCallback,
+    error: errorCallback
   });
 }
 
 /**
- * Indicates whether post request are awaiting initialization of the CSRF Token.
- * The CSRF token is a counter measure for Cross Site Request Forgery, and is 
- * required of all post requests on the content server.
- * When multiple post requests are generated for the server, the CSRF token
- * might not have been returned yet despite being requested. This variable 
- * ensures that multiple requests are not sent simultaneously.
- * Access: private variable.
+ * Show the form if the user has posting permission, otherwise tell the user to
+ * sign in. Also adds the CSRF token to all requests.
  *
- */
-var privlyCSRFTokenPending = false;
-
-/**
- * Indicates when a request has successfully set the CSRF token
- * Access: private variable.
- */
-var privlyCSRFTokenComplete = false;
-
-/**
- * Requests CSRF token on first call before calling 
- * privlyPostContentWithCSRFToken(). Subsequent calls to
- * this function will immediatly call privlyPostContentWithCSRFToken().
+ * @param canPostCallback function the function to execute when initialization is 
+ * successful.
  *
- * @param data_to_send JSON The JSON document getting posted to the server.
- * @param randomkey The random key used to encrypt the content. This parameter
- * is never sent to the remote server, but it is appended to the generated
- * link.
+ * @param loginCallback function the function to execute if the user is not logged
+ * in.
  *
+ * @param cantPostLoginCallback function the function to execute if the user is logged
+ * in but their user account does not have posting permission.
+ *
+ * @param errorCallback function the function to execute if the remote server is not
+ * available.
+ * 
  */
-function privlyPostContent(data_to_send, randomkey) {
-  
-  // This makes the post wait until the last CSRF
-  // token request completes or fails.
-  if ( privlyCSRFTokenPending ) {
-    setTimeout(
-      privlyPostContent(data_to_send, randomkey),
-      1000);
-    return;
-  }
-  
-  // We already set the CSRF token, so we can make the post request
-  if ( privlyCSRFTokenComplete ) {
-    privlyPostContentWithCSRFToken(data_to_send, randomkey);
-    return;
-  }
-  
-  privlyCSRFTokenPending = true;
-  
-  var csrfTokenAddress = window.location.protocol + "//" + window.location.host + "/posts/get_csrf";
+function initPrivlyService(canPostCallback, cantPostLoginCallback, loginCallback, errorCallback) {
+  var csrfTokenAddress = window.location.protocol + "//" + window.location.host + "/posts/user_account_data";
   
   $.ajax({
     url: csrfTokenAddress,
     data: {},
     dataType: "json",
     accepts: "json",
-    success: function (csrf_json, textStatus, jqXHR) {
+    success: function (json, textStatus, jqXHR) {
       $.ajaxSetup({
         beforeSend: function(xhr) {
-          xhr.setRequestHeader('X-CSRF-Token', csrf_json.csrf);
+          xhr.setRequestHeader('X-CSRF-Token', json.csrf);
       }});
-      privlyPostContentWithCSRFToken(data_to_send, randomkey);
-      privlyCSRFTokenPending = false;
-      privlyCSRFTokenComplete = true;
+      
+      if(json.signedIn && json.canPost) {
+        canPostCallback();
+      } else if(json.signedIn) {
+        cantPostLoginCallback();
+      } else {
+        loginCallback();
+      }
     },
-    error: function (data, textStatus, jqXHR) { 
-      showError('Could not create post (CSRF Token service not available).');
-      privlyCSRFTokenPending = false;
+    error: function (data, textStatus, jqXHR) {
+      errorCallback();
     }
   });
 }
@@ -186,7 +125,9 @@ function privlyPostContent(data_to_send, randomkey) {
 /**
  * Tell the parent document (if it exists), the name and height
  * of this document. First it posts a message to the parent iframe,
- * then dispatches an event.
+ * then dispatches an event. Browsers have different permissions 
+ * regarding message passing, so both a postmessage and event dispatch
+ * are required.
  */
 function postResizeMessage() {
   
