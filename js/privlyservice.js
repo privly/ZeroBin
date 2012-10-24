@@ -116,8 +116,8 @@ function initPrivlyService(canPostCallback, cantPostLoginCallback, loginCallback
         loginCallback();
       }
     },
-    error: function (data, textStatus, jqXHR) {
-      errorCallback();
+    error: function (jqXHR, textStatus, errorThrown) {
+      errorCallback(jqXHR, textStatus, errorThrown);
     }
   });
 }

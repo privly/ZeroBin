@@ -448,8 +448,9 @@ function initializePosting() {
         alert("Privly is in Closed Alpha. Your user account does not have permission to create new content");
         },
       stateLogin,
-      function(){
-        showError('Could not create post (CSRF Token service not available).');
+      function(jqXHR, textStatus, errorThrown){
+        showError('You have been logged out of the content server and need to log back in.');
+        stateLogin();
       }
     );
 }
