@@ -280,6 +280,7 @@ function send_data() {
  * Put the screen in "New paste" mode.
  */
 function stateNewPaste() {
+    firePrivlyMessageSecretEvent();
     $('#loginprompt').hide();
     $('#toolbar').show();
     $('#share_form_elements').show();

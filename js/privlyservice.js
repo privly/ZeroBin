@@ -145,3 +145,32 @@ function postResizeMessage() {
   }
 }
 
+/**
+ * Send a random sequence of characters to privly-type extensions.
+ * Messages containing the random sequence will be assumed to come
+ * from the extensions.
+ */
+function firePrivlyMessageSecretEvent() {
+    
+  var secret = Math.random().toString(36).substring(2) + 
+               Math.random().toString(36).substring(2) +  
+               Math.random().toString(36).substring(2);
+  
+  var messageSecretElement = document.getElementById("message");
+  if ( messageSecretElement !== undefined && 
+    messageSecretElement !== null ) {
+      messageSecretElement.setAttribute("privlyMessageSecret", secret);  
+      var evt = document.createEvent("Event");  
+      evt.initEvent("PrivlyMessageSecretEvent", true, false);  
+
+      window.addEventListener("message", 
+        function(message) {
+          if( message.data.indexOf(secret) === 0 ) {
+            $("#message").val(message.data.substring(secret.length))
+          }
+        },
+        false);
+      messageSecretElement.dispatchEvent(evt);
+    }
+}
+
