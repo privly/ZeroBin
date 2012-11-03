@@ -99,9 +99,7 @@ function initPrivlyService(canPostCallback, cantPostLoginCallback, loginCallback
   
   $.ajax({
     url: csrfTokenAddress,
-    data: {},
     dataType: "json",
-    accepts: "json",
     success: function (json, textStatus, jqXHR) {
       $.ajaxSetup({
         beforeSend: function(xhr) {
