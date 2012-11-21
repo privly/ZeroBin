@@ -144,6 +144,29 @@ function postResizeMessage() {
 }
 
 /**
+ * Handles posted messages by checking whether they have the appropriate
+ * secret. Take note that this function returns a callback, it is not the
+ * callback itself.
+ *
+ * @param secret string the secret string that only the extension can know.
+ *
+ * @return a function for handling message events.
+ */
+function messageHandler(secret) {
+  return function(message) {
+    if( message.data.indexOf(secret) === 0 ) {
+      var remaining = message.data.substr(secret.length);
+      if ( remaining.indexOf("InitialContent") === 0 ) {
+        $("#message").val(
+          remaining.substring("InitialContent".length));
+      } else if ( remaining.indexOf("Submit") === 0 ) {
+        send_data();
+      }
+    }
+  }
+}
+
+/**
  * Send a random sequence of characters to privly-type extensions.
  * Messages containing the random sequence will be assumed to come
  * from the extensions.
@@ -160,13 +183,8 @@ function firePrivlyMessageSecretEvent() {
       messageSecretElement.setAttribute("privlyMessageSecret", secret);  
       var evt = document.createEvent("Event");  
       evt.initEvent("PrivlyMessageSecretEvent", true, false);  
-
       window.addEventListener("message", 
-        function(message) {
-          if( message.data.indexOf(secret) === 0 ) {
-            $("#message").val(message.data.substring(secret.length))
-          }
-        },
+        messageHandler(secret),
         false);
       messageSecretElement.dispatchEvent(evt);
     }
