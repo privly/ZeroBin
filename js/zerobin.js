@@ -250,7 +250,8 @@ function send_data() {
     stateExistingPaste();
     
     //Form the URL for people to share it.
-    var params = {"privlyLinkKey": randomkey, 
+    var params = {"privlyLinkKey": randomkey,
+      "privlyInjectableApplication": "ZeroBin",
       "privlyCiphertextURL": jqXHR.getResponseHeader("X-Privly-Url"),
       "privlyInject1": true};
     var url = scriptLocation() + '#' + hashToParameterString(params);
