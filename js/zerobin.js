@@ -232,11 +232,14 @@ function send_data() {
                 share_csv: $("#share_share_csv").val(),
                 identity_provider_name: $("#identity_provider_name").val()
               };
+
   var data_to_send = {
     post:{
       structured_content: cipher_json, 
       share: share, 
-      public: $("#post_public").is(':checked')}};
+      public: $("#post_public").is(':checked'),
+      seconds_until_burn: 2592000 // 2592000 is 30 days in UNIX Timestamp in seconds.
+    }};	       		         // constant to the Privly::Application.config.user_can_post_lifetime_max on the server
   
   //Function called if the server returns successfully
   var successCallback = function (data, textStatus, jqXHR) {
