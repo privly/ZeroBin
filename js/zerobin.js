@@ -256,7 +256,7 @@ function send_data() {
     //Form the URL for people to share it.
     var params = {"privlyLinkKey": randomkey,
       "privlyInjectableApplication": "ZeroBin",
-      "privlyBurntAfter": 2591999,
+      "privlyBurntAfter": 2591999, // Static post expire val in UNIX time.
       "privlyCiphertextURL": jqXHR.getResponseHeader("X-Privly-Url"),
       "privlyInject1": true
     };
