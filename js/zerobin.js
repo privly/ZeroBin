@@ -238,8 +238,9 @@ function send_data() {
       structured_content: cipher_json, 
       share: share, 
       public: $("#post_public").is(':checked'),
-      seconds_until_burn: 2592000 // 2592000 is 30 days in UNIX Timestamp in seconds...
-    }};	       		         // This value was consistent with Privly::Application.config.user_can_post_lifetime_max on the server
+      seconds_until_burn: 2591999 // =30 Days - 1 Sec; UNIX Timestamp in sec.
+    // Value consistent with user_can_post_lifetime_max on the server.
+    }};	       		         
   
   //Function called if the server returns successfully
   var successCallback = function (data, textStatus, jqXHR) {
@@ -255,8 +256,10 @@ function send_data() {
     //Form the URL for people to share it.
     var params = {"privlyLinkKey": randomkey,
       "privlyInjectableApplication": "ZeroBin",
+      "privlyBurntAfter": 2591999,
       "privlyCiphertextURL": jqXHR.getResponseHeader("X-Privly-Url"),
-      "privlyInject1": true};
+      "privlyInject1": true
+    };
     var url = scriptLocation() + '#' + hashToParameterString(params);
     showStatus('');
 
