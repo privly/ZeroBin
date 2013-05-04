@@ -232,11 +232,17 @@ function send_data() {
                 share_csv: $("#share_share_csv").val(),
                 identity_provider_name: $("#identity_provider_name").val()
               };
+
+  //user_can_post_lifetime_max constant in UNIX Timestamp [2592000-1 seconds]
+  var seconds_until_burn = 2591999;
+
   var data_to_send = {
     post:{
       structured_content: cipher_json, 
       share: share, 
-      public: $("#post_public").is(':checked')}};
+      public: $("#post_public").is(':checked'),
+      seconds_until_burn: seconds_until_burn
+    }};	       		         
   
   //Function called if the server returns successfully
   var successCallback = function (data, textStatus, jqXHR) {
@@ -252,8 +258,10 @@ function send_data() {
     //Form the URL for people to share it.
     var params = {"privlyLinkKey": randomkey,
       "privlyInjectableApplication": "ZeroBin",
+      "privlyBurntAfter": Math.round(Date.now()/1000) + seconds_until_burn,
       "privlyCiphertextURL": jqXHR.getResponseHeader("X-Privly-Url"),
-      "privlyInject1": true};
+      "privlyInject1": true
+    };
     var url = scriptLocation() + '#' + hashToParameterString(params);
     showStatus('');
 
