@@ -233,13 +233,15 @@ function send_data() {
                 identity_provider_name: $("#identity_provider_name").val()
               };
 
+  //user_can_post_lifetime_max constant in UNIX Timestamp [2592000-1 seconds]
+  var seconds_until_burn = 2591999;
+
   var data_to_send = {
     post:{
       structured_content: cipher_json, 
       share: share, 
       public: $("#post_public").is(':checked'),
-      seconds_until_burn: 2591999 // =30 Days - 1 Sec; UNIX Timestamp in sec.
-    // Value consistent with user_can_post_lifetime_max on the server.
+      seconds_until_burn: seconds_until_burn
     }};	       		         
   
   //Function called if the server returns successfully
@@ -256,7 +258,7 @@ function send_data() {
     //Form the URL for people to share it.
     var params = {"privlyLinkKey": randomkey,
       "privlyInjectableApplication": "ZeroBin",
-      "privlyBurntAfter": 2591999, // Static post expire val in UNIX time.
+      "privlyBurntAfter": Math.round(Date.now()/1000) + seconds_until_burn,
       "privlyCiphertextURL": jqXHR.getResponseHeader("X-Privly-Url"),
       "privlyInject1": true
     };
