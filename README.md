@@ -1,3 +1,8 @@
+# This repository is deprecated
+
+Please view this Privly-application in [Privly-Applications](github.com/privly/privly-applications).
+
+---
 
 This is the Privly port of the ZeroBin application (see below). For more information on what Privly is, see [Priv.ly](https://priv.ly). For information on how we are using ZeroBin, read about [injectable applications](https://github.com/privly/privly-organization/wiki/Injectable-Applications).
 
